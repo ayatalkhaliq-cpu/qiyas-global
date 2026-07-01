@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qiyas ERP Lite — نظام إدارة المحلل المالي</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Tajawal', sans-serif; font-weight: 700; }
+.gradient-bg { background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f0fdf4 100%); min-height: 100vh; }
+  .hero-gradient { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #f0fdf4 100%); }
+  .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.08); }
+  .accent-gradient { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
+  .glow-green { box-shadow: 0 0 30px rgba(74, 222, 128, 0.3); }
+  .glow-purple { box-shadow: 0 0 30px rgba(168, 85, 247, 0.2); }
+  .feature-card { transition: all 0.3s; border: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.7); }
+  .feature-card:hover { transform: translateY(-5px); border-color: rgba(74, 222, 128, 0.3); box-shadow: 0 10px 40px rgba(74, 222, 128, 0.1); }
+  .stat-number { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, #4ade80, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+  .scroll-indicator { animation: bounce 2s infinite; color: #22c55e; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+  .pricing-card { transition: all 0.3s; background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.05); }
+  .pricing-card:hover { transform: scale(1.02); }
+  .testimonial-card { border-right: 3px solid #22c55e; background: rgba(255,255,255,0.7); }
+  .btn-primary { background: linear-gradient(135deg, #4ade80, #22c55e); color: white; transition: all 0.3s; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(74, 222, 128, 0.4); }
+  .btn-secondary { background: rgba(255,255,255,0.9); border: 1px solid rgba(0,0,0,0.15); color: #1e293b; transition: all 0.3s; }
+  .btn-secondary:hover { background: rgba(0,0,0,0.05); }
+  .input-field { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0,0,0,0.15); color: #1e293b; transition: all 0.3s; }
+  .input-field:focus { border-color: #22c55e; outline: none; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+  .nav-link { position: relative; transition: all 0.3s; color: #334155; }
+  .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #22c55e; transition: width 0.3s; }
+  .nav-link:hover::after { width: 100%; }
+  .hero-img { animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+  .text-white { color: #1e293b !important; }
+  .text-gray-300 { color: #475569 !important; }
+  .text-gray-400 { color: #64748b !important; }
+  .text-gray-500 { color: #94a3b8 !important; }
+  .border-white\/5 { border-color: rgba(0,0,0,0.05) !important; }
+  .border-white\/10 { border-color: rgba(0,0,0,0.08) !important; }
+  .bg-white\/5 { background: rgba(0,0,0,0.03) !important; }
+  .bg-white\/10 { background: rgba(0,0,0,0.05) !important; }
+</style>
+</head>
+<body class="gradient-bg text-slate-800">
+
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 glass border-b border-white/5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <div class="w-10 h-10 accent-gradient rounded-xl flex items-center justify-center font-bold text-lg">Q</div>
+        <div>
+          <div class="font-bold text-lg">Qiyas ERP</div>
+          <div class="text-xs text-gray-400">Lite Edition</div>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-6">
+        <a href="#features" class="nav-link text-sm">المميزات</a>
+        <a href="#tools" class="nav-link text-sm">الأدوات</a>
+        <a href="#pricing" class="nav-link text-sm">الباقات</a>
+        <a href="#about" class="nav-link text-sm">من نحن</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="btn-primary px-5 py-2 rounded-lg font-bold text-sm">ابدأ الآن →</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-gradient pt-32 pb-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <div class="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 px-4 py-2 rounded-full mb-6">
+          <span class="w-2 h-2 bg-green-400 rounded-full pulse"></span>
+          <span class="text-sm text-green-400">✨ النسخة الأولى — مجانية 100%</span>
+        </div>
+        <h1 class="text-5xl md:text-6xl font-black leading-tight mb-6">
+          نظام إدارة<br>
+          <span class="text-green-400">المحلل المالي</span>
+        </h1>
+        <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+          CRM + Calendar + Invoices + Tasks + 6 أدوات تحليل مالي<br>
+          بناءً على <span class="text-green-400 font-bold">25 سنة</span> في الشركة السعودية للكهرباء
+        </p>
+        <div class="flex flex-wrap gap-4 mb-8">
+          <a href="index.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg glow-green">
+            جرب المجاني الآن 🚀
+          </a>
+          <a href="#features" class="btn-secondary px-8 py-4 rounded-xl font-bold text-lg">
+            اكتشف المميزات
+          </a>
+        </div>
+        <div class="flex items-center gap-4 text-sm text-gray-400">
+          <span>✅ لا يحتاج تسجيل</span>
+          <span>✅ يعمل على أي جهاز</span>
+          <span>✅ بياناتك في جهازك</span>
+        </div>
+      </div>
+      <div class="hero-img">
+        <div class="glass p-6 rounded-2xl glow-green">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass p-4 rounded-xl text-center">
+              <div class="text-3xl mb-2">👥</div>
+              <div class="text-2xl font-bold text-green-400">150+</div>
+              <div class="text-xs text-gray-400">عميل</div>
+            </div>
+            <div class="glass p-4 rounded-xl text-center">
+              <div class="text-3xl mb-2">📊</div>
+              <div class="text-2xl font-bold text-green-400">6</div>
+              <div class="text-xs text-gray-400">أدوات تحليل</div>
+            </div>
+            <div class="glass p-4 rounded-xl text-center">
+              <div class="text-3xl mb-2">📅</div>
+              <div class="text-2xl font-bold text-green-400">∞</div>
+              <div class="text-xs text-gray-400">جلسات</div>
+            </div>
+            <div class="glass p-4 rounded-xl text-center">
+              <div class="text-3xl mb-2">💰</div>
+              <div class="text-2xl font-bold text-green-400">0</div>
+              <div class="text-xs text-gray-400">ر.س للبداية</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-12">
+    <div class="scroll-indicator text-2xl">↓</div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="glass p-6 rounded-2xl text-center">
+        <div class="stat-number">25+</div>
+        <div class="text-gray-400 mt-2">سنة خبرة</div>
+      </div>
+      <div class="glass p-6 rounded-2xl text-center">
+        <div class="stat-number">6</div>
+        <div class="text-gray-400 mt-2">أدوات تحليل</div>
+      </div>
+      <div class="glass p-6 rounded-2xl text-center">
+        <div class="stat-number">0</div>
+        <div class="text-gray-400 mt-2">ر.س للبداية</div>
+      </div>
+      <div class="glass p-6 rounded-2xl text-center">
+        <div class="stat-number">∞</div>
+        <div class="text-gray-400 mt-2">عملاء مجاناً</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold mb-4">كل ما يحتاجه المحلل المالي</h2>
+      <p class="text-gray-400 text-lg">في ملف واحد — يعمل على أي جهاز بدون إنترنت</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="feature-card glass p-6 rounded-2xl">
+        <div class="text-4xl mb-4">👥</div>
+        <h3 class="text-xl font-bold mb-2">إدارة العملاء (CRM)</h3>
+        <p class="text-gray-400 text-sm">سجل عملائك، بياناتهم، ملاحظاتك، وعدد الجلسات. بحث فوري وتصدير Excel.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl">
+        <div class="text-4xl mb-4">📅</div>
+        <h3 class="text-xl font-bold mb-2">جدولة الجلسات</h3>
+        <p class="text-gray-400 text-sm">نظّم مواعيدك مع العملاء. قادمة، اليوم، السابقة. ربط تلقائي بالعميل.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl">
+        <div class="text-4xl mb-4">💰</div>
+        <h3 class="text-xl font-bold mb-2">الفواتير والمدفوعات</h3>
+        <p class="text-gray-400 text-sm">سجل فواتير الجلسات. تتبع المدفوع والمستحق. إحصائيات فورية.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl">
+        <div class="text-4xl mb-4">✅</div>
+        <h3 class="text-xl font-bold mb-2">إدارة المهام</h3>
+        <p class="text-gray-400 text-sm">قيد الانتظار، قيد التنفيذ، مكتملة. انقر لتغيير الحالة. بسيط وفعال.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl">
+        <div class="text-4xl mb-4">📊</div>
+        <h3 class="text-xl font-bold mb-2">لوحة التحكم</h3>
+        <p class="text-gray-400 text-sm">نظرة عامة على عملك: عملاء، جلسات، إيرادات، مهام. كل شيء في صفحة واحدة.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl">
+        <div class="text-4xl mb-4">💾</div>
+        <h3 class="text-xl font-bold mb-2">تصدير واستيراد</h3>
+        <p class="text-gray-400 text-sm">احفظ بياناتك في JSON. انقل بين الأجهزة. لا تخسر شيئاً.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tools Section -->
+<section id="tools" class="py-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <h2 class="text-4xl font-bold mb-4">6 أدوات تحليل مالي متقدمة</h2>
+      <p class="text-gray-400 text-lg">لا يوجد مثلها في السوق العربي</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="feature-card glass p-6 rounded-2xl border-l-4 border-green-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">📊 النسب المالية</h3>
+          <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">14+ نسبة</span>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">ربحية، سيولة، كفاءة. Charts تفاعلية. تصدير Excel.</p>
+        <div class="flex gap-2 text-xs text-gray-500">
+          <span>ROE</span><span>ROA</span><span>P/E</span><span>Current</span>
+        </div>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl border-l-4 border-purple-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">🧮 DCF</h3>
+          <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">نادر</span>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">التدفقات النقدية المخصومة. PV + Terminal Value + Fair Price.</p>
+        <div class="text-xs text-gray-500">لا يوجد في السوق العربي</div>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl border-l-4 border-blue-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">📋 الميزانية</h3>
+          <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">من واقع خبرة</span>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">تخطيط + FCF + صافي ربح + Charts. من 25 سنة في SEC.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl border-l-4 border-yellow-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">📈 أفقي/رأسي</h3>
+          <span class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">3 سنوات</span>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">مقارنة الأداء عبر الزمن. Common Size + Trend Analysis.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl border-l-4 border-pink-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">🏢 مقارنة الشركات</h3>
+          <span class="text-xs bg-pink-500/20 text-pink-400 px-2 py-1 rounded">Radar Chart</span>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">قارن شركتين: P/E, P/B, ROE, Debt/Equity. رسم بياني تفاعلي.</p>
+      </div>
+      <div class="feature-card glass p-6 rounded-2xl border-l-4 border-orange-400">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold">⚖️ نقطة التعادل</h3>
+          <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">Break-even</span>
+        </div>
+        <p class="text-gray-400 text-sm mb-4">حاسبة نقطة التعادل + هامش الأمان + Profit Chart.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison Section -->
+<section class="py-20 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-4">لماذا Qiyas ERP؟</h2>
+      <p class="text-gray-400">مقارنة سريعة مع البدائل</p>
+    </div>
+    <div class="glass overflow-hidden rounded-2xl">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-white/10">
+            <th class="p-4 text-right">الميزة</th>
+            <th class="p-4 text-center">Excel</th>
+            <th class="p-4 text-center">Odoo</th>
+            <th class="p-4 text-center accent-text">Qiyas ERP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-white/5">
+            <td class="p-4">CRM + Calendar + Invoices</td>
+            <td class="p-4 text-center text-red-400">❌</td>
+            <td class="p-4 text-center text-yellow-400">⚠️ معقد</td>
+            <td class="p-4 text-center text-green-400">✅ بسيط</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-4">DCF + Multiples</td>
+            <td class="p-4 text-center text-yellow-400">⚠️ يدوي</td>
+            <td class="p-4 text-center text-red-400">❌</td>
+            <td class="p-4 text-center text-green-400">✅ جاهز</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-4">تخطيط ميزانيات</td>
+            <td class="p-4 text-center text-yellow-400">⚠️ قوالب</td>
+            <td class="p-4 text-center text-yellow-400">⚠️ محاسبة</td>
+            <td class="p-4 text-center text-green-400">✅ تحليلي</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-4">Charts تفاعلية</td>
+            <td class="p-4 text-center text-red-400">❌</td>
+            <td class="p-4 text-center text-yellow-400">⚠️ يحتاج إعداد</td>
+            <td class="p-4 text-center text-green-400">✅ فورية</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-4">التكلفة</td>
+            <td class="p-4 text-center text-yellow-400">$100/سنة</td>
+            <td class="p-4 text-center text-red-400">€7/شهر</td>
+            <td class="p-4 text-center text-green-400 font-bold">$0</td>
+          </tr>
+          <tr class="border-b border-white/5">
+            <td class="p-4">الإعداد</td>
+            <td class="p-4 text-center text-amber-600">ساعات</td>
+            <td class="p-4 text-center text-red-400">أيام + خبير</td>
+            <td class="p-4 text-center text-green-400">5 دقائق</td>
+          </tr>
+          <tr>
+            <td class="p-4">خبرة SEC</td>
+            <td class="p-4 text-center text-red-400">❌</td>
+            <td class="p-4 text-center text-red-400">❌</td>
+            <td class="p-4 text-center text-green-400">✅ 25 سنة</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-20 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-4">ما يقولون عن Qiyas</h2>
+      <p class="text-gray-400">تجارب من واقع الاستخدام</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="testimonial-card glass p-6 rounded-2xl">
+        <div class="text-green-400 text-2xl mb-4">"</div>
+        <p class="text-gray-300 mb-4">أخيراً أداة عربية تفهم احتياجات المحلل المالي. DCF جاهز ولا يحتاج Excel معقد.</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center font-bold">أ</div>
+          <div>
+            <div class="font-bold">أحمد محمد</div>
+            <div class="text-xs text-gray-400">محلل مالي</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card glass p-6 rounded-2xl">
+        <div class="text-green-400 text-2xl mb-4">"</div>
+        <p class="text-gray-300 mb-4">CRM بسيط + جدولة الجلسات + فواتير. كل شيء في ملف واحد. يعمل بدون إنترنت!</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center font-bold">خ</div>
+          <div>
+            <div class="font-bold">خالد العلي</div>
+            <div class="text-xs text-gray-400">مستشار مالي</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card glass p-6 rounded-2xl">
+        <div class="text-green-400 text-2xl mb-4">"</div>
+        <p class="text-gray-300 mb-4">تخطيط الميزانية من واقع خبرة SEC — هذا ما يميز Qiyas. ليس نظرياً، عملي 100%.</p>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center font-bold">س</div>
+          <div>
+            <div class="font-bold">سارة القحطاني</div>
+            <div class="text-xs text-gray-400">محاسبة</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section id="pricing" class="py-20 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold mb-4">ابدأ مجاناً — رقِّ عندما تكون جاهزاً</h2>
+      <p class="text-gray-400">لا اشتراك إجباري. لا خصم مخفي.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="pricing-card glass p-8 rounded-2xl">
+        <div class="text-center mb-6">
+          <div class="text-lg font-bold mb-2">مجاني</div>
+          <div class="text-4xl font-bold mb-2">0</div>
+          <div class="text-gray-400">ر.س / شهر</div>
+        </div>
+        <ul class="space-y-3 text-sm text-gray-300 mb-8">
+          <li class="flex items-center gap-2">✅ <span>3 أدوات تحليلية</span></li>
+          <li class="flex items-center gap-2">✅ <span>CRM بسيط</span></li>
+          <li class="flex items-center gap-2">✅ <span>Calendar + Tasks</span></li>
+          <li class="flex items-center gap-2">✅ <span>5 فواتير/شهر</span></li>
+          <li class="flex items-center gap-2">✅ <span>تصدير JSON</span></li>
+          <li class="flex items-center gap-2 text-gray-500">❌ <span>Multiples + LBO</span></li>
+          <li class="flex items-center gap-2 text-gray-500">❌ <span>تصدير Excel</span></li>
+        </ul>
+        <a href="index.html" class="btn-secondary w-full py-3 rounded-xl font-bold text-center block">ابدأ مجاناً</a>
+      </div>
+      <div class="pricing-card glass p-8 rounded-2xl border-2 border-green-400 glow-green">
+        <div class="text-center mb-6">
+          <div class="text-lg font-bold mb-2 accent-text">احترافية</div>
+          <div class="text-4xl font-bold mb-2 accent-text">49</div>
+          <div class="text-gray-400">ر.س / شهر</div>
+        </div>
+        <ul class="space-y-3 text-sm text-gray-300 mb-8">
+          <li class="flex items-center gap-2">✅ <span>كل الأدوات (6+)</span></li>
+          <li class="flex items-center gap-2">✅ <span>CRM كامل</span></li>
+          <li class="flex items-center gap-2">✅ <span>Calendar + Tasks</span></li>
+          <li class="flex items-center gap-2">✅ <span>Invoices غير محدود</span></li>
+          <li class="flex items-center gap-2">✅ <span>Dashboard كامل</span></li>
+          <li class="flex items-center gap-2">✅ <span>Multiples + LBO</span></li>
+          <li class="flex items-center gap-2">✅ <span>تصدير Excel</span></li>
+        </ul>
+        <a href="index.html" class="btn-primary w-full py-3 rounded-xl font-bold text-center block">ابدأ الآن</a>
+      </div>
+      <div class="pricing-card glass p-8 rounded-2xl">
+        <div class="text-center mb-6">
+          <div class="text-lg font-bold mb-2">استشارة</div>
+          <div class="text-4xl font-bold mb-2">500</div>
+          <div class="text-gray-400">ر.س / جلسة</div>
+        </div>
+        <ul class="space-y-3 text-sm text-gray-300 mb-8">
+          <li class="flex items-center gap-2">✅ <span>جلسة توجيهية (ساعة)</span></li>
+          <li class="flex items-center gap-2">✅ <span>مراجعة تحليلك</span></li>
+          <li class="flex items-center gap-2">✅ <span>شرح DCF/Multiples</span></li>
+          <li class="flex items-center gap-2">✅ <span>مساعدة في ميزانية</span></li>
+          <li class="flex items-center gap-2 text-gray-500">❌ <span>لا توصيات شراء/بيع</span></li>
+          <li class="flex items-center gap-2 text-gray-500">❌ <span>لا تخطيط مالي شخصي</span></li>
+        </ul>
+        <a href="index.html" class="btn-secondary w-full py-3 rounded-xl font-bold text-center block">احجز جلسة</a>
+      </div>
+    </div>
+    <div class="text-center mt-8">
+      <p class="text-sm text-gray-400">💡 الباقة الاحترافية = Bloomberg Terminal ($24,000/سنة) بـ 49 ر.س/شهر</p>
+    </div>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-20 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="glass p-8 rounded-2xl">
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="text-3xl font-bold mb-4">من نحن؟</h2>
+          <p class="text-gray-300 mb-4 leading-relaxed">
+            Qiyas ERP Lite بني بناءً على <span class="text-green-400 font-bold">25 سنة</span> من الخبرة في الشركة السعودية للكهرباء (SEC).
+          </p>
+          <p class="text-gray-300 mb-4 leading-relaxed">
+            تخطيط ميزانيات، تحليل انحراف، مشاريع استثمارية، تقييم مالي — كلها في أدوات بسيطة تعمل على أي جهاز.
+          </p>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-2xl">⚠️</span>
+            <p class="text-sm text-amber-700">المُقدم محلل مالي متقاعد — ليس مستشاراً مالياً مرخصاً من CMA.</p>
+          </div>
+          <p class="text-gray-400 text-sm">المنصة تحليلية وتعليمية فقط. لا توصيات استثمارية.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-32 h-32 mx-auto accent-gradient rounded-2xl flex items-center justify-center text-5xl font-black mb-4">Q</div>
+          <div class="text-2xl font-bold">Qiyas ERP</div>
+          <div class="text-gray-400">Lite Edition 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="text-4xl font-bold mb-4">جرب Qiyas ERP الآن</h2>
+    <p class="text-xl text-gray-400 mb-8">ملف واحد. يعمل على أي جهاز. بدون تسجيل. بدون إنترنت.</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="index.html" class="btn-primary px-10 py-4 rounded-xl font-bold text-lg glow-green">
+        🚀 ابدأ المجاني
+      </a>
+      <a href="#" class="btn-secondary px-10 py-4 rounded-xl font-bold text-lg" onclick="alert('اختر\'ابدأ المجاني\' وفتح الملف مباشرة!')">
+        📥 تحميل الملف
+      </a>
+    </div>
+    <div class="mt-8 flex justify-center gap-6 text-sm text-gray-400">
+      <span>✅ HTML واحد</span>
+      <span>✅ 83 KB</span>
+      <span>✅ يعمل offline</span>
+      <span>✅ بياناتك في جهازك</span>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-white/5 py-12 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 accent-gradient rounded-lg flex items-center justify-center font-bold">Q</div>
+          <div class="font-bold">Qiyas ERP</div>
+        </div>
+        <p class="text-sm text-gray-400">نظام إدارة المحلل المالي. بني من خبرة 25 سنة في SEC.</p>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4">النظام</h4>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="index.html" class="hover:text-green-400">CRM</a></li>
+          <li><a href="index.html" class="hover:text-green-400">Calendar</a></li>
+          <li><a href="index.html" class="hover:text-green-400">Invoices</a></li>
+          <li><a href="index.html" class="hover:text-green-400">Tasks</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4">الأدوات</h4>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="index.html" class="hover:text-green-400">النسب المالية</a></li>
+          <li><a href="index.html" class="hover:text-green-400">DCF</a></li>
+          <li><a href="index.html" class="hover:text-green-400">الميزانية</a></li>
+          <li><a href="index.html" class="hover:text-green-400">نقطة التعادل</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-bold mb-4">قانوني</h4>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li>⚠️ تحليلية وتعليمية فقط</li>
+          <li>⚠️ لا توصيات استثمارية</li>
+          <li>⚠️ غير مرخص من CMA</li>
+          <li>© 2025 Qiyas Global</li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-white/5 pt-8 text-center text-sm text-gray-500">
+      <p>Qiyas ERP Lite © 2025 — جميع الحقوق محفوظة. هذا النظام تحليلي وتعليمي فقط.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
