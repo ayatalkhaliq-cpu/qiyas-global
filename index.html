@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qiyas ERP Lite — نظام إدارة المحلل المالي</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Tajawal', sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
+  .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+  .glass-light { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+  .accent-gradient { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
+  .accent-text { color: #22c55e; }
+  .glow { box-shadow: 0 0 20px rgba(74, 222, 128, 0.3); }
+  .page { display: none; animation: fadeIn 0.3s ease-in-out; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .input-field { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); color: white; transition: all 0.3s; }
+  .input-field:focus { border-color: #22c55e; outline: none; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2); }
+  .btn-primary { background: linear-gradient(135deg, #4ade80, #22c55e); color: white; transition: all 0.3s; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(74, 222, 128, 0.4); }
+  .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; transition: all 0.3s; }
+  .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+  .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+  .card { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; transition: all 0.3s; }
+  .card:hover { border-color: rgba(74, 222, 128, 0.3); }
+  .table-dark { background: rgba(15, 23, 42, 0.6); }
+  .table-dark th { background: rgba(30, 41, 59, 0.8); color: #22c55e; }
+  .table-dark td { border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .metric-positive { color: #22c55e; }
+  .metric-negative { color: #ef4444; }
+  .badge-paid { background: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+  .badge-unpaid { background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+  .badge-pending { background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+  .sidebar-item { transition: all 0.2s; border-radius: 8px; padding: 10px 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .sidebar-item:hover, .sidebar-item.active { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+  .stat-card { background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(74, 222, 128, 0.2); }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  @media print { .no-print { display: none !important; } }
+</style>
+</head>
+<body class="gradient-bg text-white min-h-screen">
+
+<!-- Sidebar -->
+<aside class="fixed top-0 right-0 h-full w-64 glass border-l border-white/5 z-50 no-print flex flex-col">
+  <div class="p-4 border-b border-white/5">
+    <div class="flex items-center gap-2">
+      <div class="w-10 h-10 accent-gradient rounded-xl flex items-center justify-center font-bold text-lg">Q</div>
+      <div>
+        <div class="font-bold">Qiyas ERP</div>
+        <div class="text-xs text-gray-400">نظام المحلل المالي</div>
+      </div>
+    </div>
+  </div>
+  <nav class="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-hide">
+    <div class="sidebar-item active" onclick="showPage('dashboard')" data-page="dashboard">
+      <span>📊</span><span>لوحة التحكم</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('crm')" data-page="crm">
+      <span>👥</span><span>العملاء (CRM)</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('calendar')" data-page="calendar">
+      <span>📅</span><span>الجدولة</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('invoices')" data-page="invoices">
+      <span>💰</span><span>الفواتير</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('tasks')" data-page="tasks">
+      <span>✅</span><span>المهام</span>
+    </div>
+    <div class="pt-4 pb-2 text-xs text-gray-500 font-bold">أدوات التحليل</div>
+    <div class="sidebar-item" onclick="showPage('tools')" data-page="tools">
+      <span>🧮</span><span>أدوات التحليل</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('academy')" data-page="academy">
+      <span>🎓</span><span>الأكاديمية</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('consulting')" data-page="consulting">
+      <span>📞</span><span>الاستشارة الخاصة</span>
+    </div>
+    <div class="pt-4 pb-2 text-xs text-gray-500 font-bold">الإعدادات</div>
+    <div class="sidebar-item" onclick="showPage('about')" data-page="about">
+      <span>🏛️</span><span>من نحن</span>
+    </div>
+    <div class="sidebar-item" onclick="showPage('terms')" data-page="terms">
+      <span>⚖️</span><span>الشروط والأحكام</span>
+    </div>
+    <div class="sidebar-item" onclick="exportData()">
+      <span>💾</span><span>تصدير البيانات</span>
+    </div>
+    <div class="sidebar-item" onclick="importData()">
+      <span>📂</span><span>استيراد البيانات</span>
+    </div>
+  </nav>
+  <div class="p-4 border-t border-white/5">
+    <div class="sidebar-item" onclick="showPage('pricing')">
+      <span>💎</span><span>الباقات</span>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="mr-64 min-h-screen">
+
+  <!-- Top Bar -->
+  <header class="glass border-b border-white/5 px-6 py-3 flex items-center justify-between no-print">
+    <div class="flex items-center gap-4">
+      <span class="text-sm text-gray-400">📍 <span id="current-date"></span></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-sm text-yellow-200 bg-yellow-500/10 px-3 py-1 rounded-lg text-xs">
+        ⚠️ تنبيه: المنصة تحليلية وتعليمية فقط
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE: DASHBOARD -->
+  <div id="page-dashboard" class="page active p-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">لوحة التحكم</h1>
+      <p class="text-gray-400 text-sm">نظرة عامة على عملك كمحلل مالي</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="stat-card p-4 rounded-xl">
+        <div class="text-sm text-gray-400">العملاء</div>
+        <div class="text-2xl font-bold accent-text" id="dash-clients">0</div>
+      </div>
+      <div class="stat-card p-4 rounded-xl">
+        <div class="text-sm text-gray-400">الجلسات هذا الشهر</div>
+        <div class="text-2xl font-bold accent-text" id="dash-sessions">0</div>
+      </div>
+      <div class="stat-card p-4 rounded-xl">
+        <div class="text-sm text-gray-400">الإيرادات (ر.س)</div>
+        <div class="text-2xl font-bold accent-text" id="dash-revenue">0</div>
+      </div>
+      <div class="stat-card p-4 rounded-xl">
+        <div class="text-sm text-gray-400">المهام المعلقة</div>
+        <div class="text-2xl font-bold accent-text" id="dash-tasks">0</div>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-6">
+        <h3 class="font-bold mb-4">الجلسات القادمة</h3>
+        <div id="dash-upcoming" class="space-y-2"></div>
+      </div>
+      <div class="card p-6">
+        <h3 class="font-bold mb-4">أحدث العملاء</h3>
+        <div id="dash-latest-clients" class="space-y-2"></div>
+      </div>
+      <div class="card p-6">
+        <h3 class="font-bold mb-4">الفواتير غير المدفوعة</h3>
+        <div id="dash-unpaid" class="space-y-2"></div>
+      </div>
+      <div class="card p-6">
+        <h3 class="font-bold mb-4">آخر المهام</h3>
+        <div id="dash-latest-tasks" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: CRM -->
+  <div id="page-crm" class="page p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">إدارة العملاء (CRM)</h1>
+        <p class="text-gray-400 text-sm">سجل عملائك وتواصل معهم</p>
+      </div>
+      <button onclick="openClientModal()" class="btn-primary px-4 py-2 rounded-lg">+ عميل جديد</button>
+    </div>
+    <div class="flex gap-3 mb-4">
+      <input type="text" id="client-search" class="input-field px-4 py-2 rounded-lg flex-1" placeholder="بحث في العملاء..." oninput="renderClients()">
+      <button onclick="exportClients()" class="btn-secondary px-4 py-2 rounded-lg">تصدير</button>
+    </div>
+    <div class="card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead><tr class="text-right">
+          <th class="p-3">الاسم</th><th class="p-3">البريد</th><th class="p-3">الهاتف</th><th class="p-3">الجلسات</th><th class="p-3">آخر تواصل</th><th class="p-3">ملاحظات</th><th class="p-3">إجراء</th>
+        </tr></thead>
+        <tbody id="clients-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGE: CALENDAR -->
+  <div id="page-calendar" class="page p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">جدولة الجلسات</h1>
+        <p class="text-gray-400 text-sm">نظّم مواعيدك مع العملاء</p>
+      </div>
+      <button onclick="openSessionModal()" class="btn-primary px-4 py-2 rounded-lg">+ جلسة جديدة</button>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-4">
+        <h3 class="font-bold text-green-400 mb-3">قادمة</h3>
+        <div id="sessions-upcoming" class="space-y-2"></div>
+      </div>
+      <div class="card p-4">
+        <h3 class="font-bold text-yellow-400 mb-3">اليوم</h3>
+        <div id="sessions-today" class="space-y-2"></div>
+      </div>
+      <div class="card p-4">
+        <h3 class="font-bold text-gray-400 mb-3">السابقة</h3>
+        <div id="sessions-past" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: INVOICES -->
+  <div id="page-invoices" class="page p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">الفواتير</h1>
+        <p class="text-gray-400 text-sm">إدارة المدفوعات والمستحقات</p>
+      </div>
+      <button onclick="openInvoiceModal()" class="btn-primary px-4 py-2 rounded-lg">+ فاتورة جديدة</button>
+    </div>
+    <div class="flex gap-3 mb-4">
+      <select id="invoice-filter" class="input-field px-4 py-2 rounded-lg" onchange="renderInvoices()">
+        <option value="all">الكل</option><option value="paid">مدفوعة</option><option value="unpaid">غير مدفوعة</option><option value="pending">معلقة</option>
+      </select>
+      <button onclick="exportInvoices()" class="btn-secondary px-4 py-2 rounded-lg">تصدير Excel</button>
+    </div>
+    <div class="card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead><tr class="text-right">
+          <th class="p-3">#</th><th class="p-3">التاريخ</th><th class="p-3">العميل</th><th class="p-3">الموضوع</th><th class="p-3">المبلغ</th><th class="p-3">الحالة</th><th class="p-3">إجراء</th>
+        </tr></thead>
+        <tbody id="invoices-table"></tbody>
+      </table>
+    </div>
+    <div class="grid grid-cols-3 gap-4 mt-6">
+      <div class="stat-card p-4 rounded-xl text-center">
+        <div class="text-sm text-gray-400">إجمالي المدفوع</div><div class="text-xl font-bold text-green-400" id="inv-total-paid">0</div>
+      </div>
+      <div class="stat-card p-4 rounded-xl text-center">
+        <div class="text-sm text-gray-400">المستحق</div><div class="text-xl font-bold text-red-400" id="inv-total-unpaid">0</div>
+      </div>
+      <div class="stat-card p-4 rounded-xl text-center">
+        <div class="text-sm text-gray-400">الإجمالي</div><div class="text-xl font-bold accent-text" id="inv-total">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: TASKS -->
+  <div id="page-tasks" class="page p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">المهام</h1>
+        <p class="text-gray-400 text-sm">نظّم يومك</p>
+      </div>
+      <button onclick="openTaskModal()" class="btn-primary px-4 py-2 rounded-lg">+ مهمة جديدة</button>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-4">
+        <h3 class="font-bold text-yellow-400 mb-3">قيد الانتظار</h3>
+        <div id="tasks-todo" class="space-y-2"></div>
+      </div>
+      <div class="card p-4">
+        <h3 class="font-bold text-blue-400 mb-3">قيد التنفيذ</h3>
+        <div id="tasks-progress" class="space-y-2"></div>
+      </div>
+      <div class="card p-4">
+        <h3 class="font-bold text-green-400 mb-3">مكتملة</h3>
+        <div id="tasks-done" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: TOOLS -->
+  <div id="page-tools" class="page p-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">أدوات التحليل المالي</h1>
+      <p class="text-gray-400 text-sm">أدوات تحليلية متقدمة — بناءً على خبرة 25 سنة في SEC</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="card p-5 cursor-pointer hover:glow" onclick="showTool('ratios')">
+        <div class="text-3xl mb-2">📊</div>
+        <h3 class="font-bold">النسب المالية</h3>
+        <p class="text-gray-400 text-sm">25+ نسبة: ربحية، سيولة، كفاءة</p>
+      </div>
+      <div class="card p-5 cursor-pointer hover:glow" onclick="showTool('dcf')">
+        <div class="text-3xl mb-2">🧮</div>
+        <h3 class="font-bold">نموذج DCF</h3>
+        <p class="text-gray-400 text-sm">التدفقات النقدية المخصومة</p>
+      </div>
+      <div class="card p-5 cursor-pointer hover:glow" onclick="showTool('budget')">
+        <div class="text-3xl mb-2">📋</div>
+        <h3 class="font-bold">المُخطّط الميزاني</h3>
+        <p class="text-gray-400 text-sm">تخطيط + تحليل انحراف</p>
+      </div>
+      <div class="card p-5 cursor-pointer hover:glow" onclick="showTool('horizontal')">
+        <div class="text-3xl mb-2">📈</div>
+        <h3 class="font-bold">التحليل الأفقي والرأسي</h3>
+        <p class="text-gray-400 text-sm">مقارنة 3 سنوات</p>
+      </div>
+      <div class="card p-5 cursor-pointer hover:glow" onclick="showTool('comparison')">
+        <div class="text-3xl mb-2">🏢</div>
+        <h3 class="font-bold">مقارنة الشركات</h3>
+        <p class="text-gray-400 text-sm">رادار + جدول</p>
+      </div>
+      <div class="card p-5 cursor-pointer hover:glow" onclick="showTool('breakeven')">
+        <div class="text-3xl mb-2">⚖️</div>
+        <h3 class="font-bold">حاسبة نقطة التعادل</h3>
+        <p class="text-gray-400 text-sm">Break-even + هامش الأمان</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOL: RATIOS -->
+  <div id="tool-ratios" class="page p-6">
+    <div class="flex items-center gap-3 mb-4 no-print">
+      <button onclick="showTool('tools')" class="btn-secondary px-3 py-2 rounded-lg text-sm">← الأدوات</button>
+    </div>
+    <h2 class="text-2xl font-bold mb-2">النسب المالية</h2>
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 accent-text">قائمة الدخل</h4>
+        <div class="space-y-2">
+          <div><label class="text-xs text-gray-400">الإيرادات</label><input type="number" id="rev" class="input-field w-full px-3 py-1 rounded-lg" value="1000000"></div>
+          <div><label class="text-xs text-gray-400">COGS</label><input type="number" id="cogs" class="input-field w-full px-3 py-1 rounded-lg" value="600000"></div>
+          <div><label class="text-xs text-gray-400">المصاريف</label><input type="number" id="opex" class="input-field w-full px-3 py-1 rounded-lg" value="200000"></div>
+          <div><label class="text-xs text-gray-400">الفوائد</label><input type="number" id="interest" class="input-field w-full px-3 py-1 rounded-lg" value="50000"></div>
+          <div><label class="text-xs text-gray-400">الضرائب</label><input type="number" id="tax" class="input-field w-full px-3 py-1 rounded-lg" value="30000"></div>
+        </div>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 accent-text">الميزانية العمومية</h4>
+        <div class="space-y-2">
+          <div><label class="text-xs text-gray-400">أصول متداولة</label><input type="number" id="ca" class="input-field w-full px-3 py-1 rounded-lg" value="500000"></div>
+          <div><label class="text-xs text-gray-400">مخزون</label><input type="number" id="inventory" class="input-field w-full px-3 py-1 rounded-lg" value="150000"></div>
+          <div><label class="text-xs text-gray-400">أصول ثابتة</label><input type="number" id="fa" class="input-field w-full px-3 py-1 rounded-lg" value="800000"></div>
+          <div><label class="text-xs text-gray-400">التزامات متداولة</label><input type="number" id="cl" class="input-field w-full px-3 py-1 rounded-lg" value="200000"></div>
+          <div><label class="text-xs text-gray-400">ديون طويلة</label><input type="number" id="ltd" class="input-field w-full px-3 py-1 rounded-lg" value="300000"></div>
+          <div><label class="text-xs text-gray-400">حقوق الملكية</label><input type="number" id="equity" class="input-field w-full px-3 py-1 rounded-lg" value="800000"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-4 no-print">
+      <button onclick="calcRatios()" class="btn-primary px-6 py-2 rounded-lg font-bold">احسب</button>
+      <button onclick="loadSampleRatios()" class="btn-secondary px-4 py-2 rounded-lg">مثال</button>
+      <button onclick="exportRatiosExcel()" class="btn-secondary px-4 py-2 rounded-lg">Excel</button>
+    </div>
+    <div id="ratios-results" class="hidden">
+      <div class="grid md:grid-cols-3 gap-4 mb-4">
+        <div class="card p-4"><h4 class="font-bold text-green-400 mb-2">الربحية</h4><div id="r-profit" class="space-y-1 text-sm"></div></div>
+        <div class="card p-4"><h4 class="font-bold text-green-400 mb-2">السيولة</h4><div id="r-liquid" class="space-y-1 text-sm"></div></div>
+        <div class="card p-4"><h4 class="font-bold text-green-400 mb-2">الكفاءة</h4><div id="r-eff" class="space-y-1 text-sm"></div></div>
+      </div>
+      <div class="card p-4"><canvas id="ratiosChart" height="80"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TOOL: DCF -->
+  <div id="tool-dcf" class="page p-6">
+    <div class="flex items-center gap-3 mb-4 no-print"><button onclick="showTool('tools')" class="btn-secondary px-3 py-2 rounded-lg text-sm">← الأدوات</button></div>
+    <h2 class="text-2xl font-bold mb-2">نموذج DCF</h2>
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div class="card p-4">
+        <div class="space-y-2">
+          <div><label class="text-xs text-gray-400">WACC %</label><input type="number" id="wacc" class="input-field w-full px-3 py-1 rounded-lg" value="10" step="0.1"></div>
+          <div><label class="text-xs text-gray-400">نمو دائم %</label><input type="number" id="g" class="input-field w-full px-3 py-1 rounded-lg" value="2" step="0.1"></div>
+          <div><label class="text-xs text-gray-400">عدد الأسهم</label><input type="number" id="shares" class="input-field w-full px-3 py-1 rounded-lg" value="1000000"></div>
+          <div><label class="text-xs text-gray-400">ديون صافية</label><input type="number" id="net-debt" class="input-field w-full px-3 py-1 rounded-lg" value="200000"></div>
+        </div>
+      </div>
+      <div class="md:col-span-2 card p-4">
+        <h4 class="font-bold mb-2">FCF (آلاف)</h4>
+        <div class="grid grid-cols-5 gap-2">
+          <div><label class="text-xs text-gray-400">س1</label><input type="number" id="fcf1" class="input-field w-full px-2 py-1 rounded-lg text-center" value="100"></div>
+          <div><label class="text-xs text-gray-400">س2</label><input type="number" id="fcf2" class="input-field w-full px-2 py-1 rounded-lg text-center" value="115"></div>
+          <div><label class="text-xs text-gray-400">س3</label><input type="number" id="fcf3" class="input-field w-full px-2 py-1 rounded-lg text-center" value="132"></div>
+          <div><label class="text-xs text-gray-400">س4</label><input type="number" id="fcf4" class="input-field w-full px-2 py-1 rounded-lg text-center" value="152"></div>
+          <div><label class="text-xs text-gray-400">س5</label><input type="number" id="fcf5" class="input-field w-full px-2 py-1 rounded-lg text-center" value="175"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-4 no-print">
+      <button onclick="calcDCF()" class="btn-primary px-6 py-2 rounded-lg font-bold">احسب DCF</button>
+      <button onclick="loadSampleDCF()" class="btn-secondary px-4 py-2 rounded-lg">مثال</button>
+    </div>
+    <div id="dcf-results" class="hidden">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">PV FCF</div><div id="dcf-pv-fcf" class="text-xl font-bold accent-text"></div></div>
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">PV TV</div><div id="dcf-pv-tv" class="text-xl font-bold accent-text"></div></div>
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">قيمة الشركة</div><div id="dcf-enterprise" class="text-xl font-bold accent-text"></div></div>
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">السهم العادل</div><div id="dcf-fair" class="text-xl font-bold accent-text"></div></div>
+      </div>
+      <div class="card p-4 overflow-x-auto">
+        <table class="w-full text-sm"><thead><tr><th>السنة</th><th>FCF</th><th>الخصم</th><th>PV</th></tr></thead><tbody id="dcf-table"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOL: BUDGET -->
+  <div id="tool-budget" class="page p-6">
+    <div class="flex items-center gap-3 mb-4 no-print"><button onclick="showTool('tools')" class="btn-secondary px-3 py-2 rounded-lg text-sm">← الأدوات</button></div>
+    <h2 class="text-2xl font-bold mb-2">المُخطّط الميزاني</h2>
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="card p-4">
+        <div class="space-y-2">
+          <div><label class="text-xs text-gray-400">إيرادات شهرية</label><input type="number" id="b-rev" class="input-field w-full px-3 py-1 rounded-lg" value="500000"></div>
+          <div><label class="text-xs text-gray-400">% تكلفة</label><input type="number" id="b-cogs" class="input-field w-full px-3 py-1 rounded-lg" value="45" step="0.1"></div>
+          <div><label class="text-xs text-gray-400">مصاريف شهرية</label><input type="number" id="b-opex" class="input-field w-full px-3 py-1 rounded-lg" value="120000"></div>
+          <div><label class="text-xs text-gray-400">CapEx سنوي</label><input type="number" id="b-capex" class="input-field w-full px-3 py-1 rounded-lg" value="300000"></div>
+        </div>
+      </div>
+      <div class="card p-4">
+        <div class="space-y-2">
+          <div><label class="text-xs text-gray-400">أقساط ديون</label><input type="number" id="b-debt" class="input-field w-full px-3 py-1 rounded-lg" value="100000"></div>
+          <div><label class="text-xs text-gray-400">% فائدة</label><input type="number" id="b-int" class="input-field w-full px-3 py-1 rounded-lg" value="6" step="0.1"></div>
+          <div><label class="text-xs text-gray-400">استهلاك شهري</label><input type="number" id="b-depr" class="input-field w-full px-3 py-1 rounded-lg" value="25000"></div>
+          <div><label class="text-xs text-gray-400">% نمو</label><input type="number" id="b-growth" class="input-field w-full px-3 py-1 rounded-lg" value="5" step="0.1"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-4 no-print">
+      <button onclick="calcBudget()" class="btn-primary px-6 py-2 rounded-lg font-bold">احسب</button>
+      <button onclick="loadSampleBudget()" class="btn-secondary px-4 py-2 rounded-lg">مثال</button>
+    </div>
+    <div id="budget-results" class="hidden">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">إيرادات سنوية</div><div id="b-annual" class="text-lg font-bold accent-text"></div></div>
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">صافي ربح</div><div id="b-net" class="text-lg font-bold accent-text"></div></div>
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">FCF</div><div id="b-fcf" class="text-lg font-bold accent-text"></div></div>
+        <div class="card p-4 text-center"><div class="text-xs text-gray-400">نقطة تعادل</div><div id="b-breakeven" class="text-lg font-bold accent-text"></div></div>
+      </div>
+      <div class="card p-4"><canvas id="budgetChart" height="80"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TOOL: HORIZONTAL -->
+  <div id="tool-horizontal" class="page p-6">
+    <div class="flex items-center gap-3 mb-4 no-print"><button onclick="showTool('tools')" class="btn-secondary px-3 py-2 rounded-lg text-sm">← الأدوات</button></div>
+    <h2 class="text-2xl font-bold mb-2">التحليل الأفقي والرأسي</h2>
+    <div class="card p-4 mb-4">
+      <div class="grid grid-cols-4 gap-2 mb-2">
+        <div></div>
+        <div class="text-center font-bold text-green-400">2022</div>
+        <div class="text-center font-bold text-green-400">2023</div>
+        <div class="text-center font-bold text-green-400">2024</div>
+      </div>
+      <div class="space-y-2" id="hor-rows">
+        <div class="grid grid-cols-4 gap-2"><label class="text-xs">الإيرادات</label><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-rev1" value="1000"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-rev2" value="1150"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-rev3" value="1320"></div>
+        <div class="grid grid-cols-4 gap-2"><label class="text-xs">COGS</label><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-cogs1" value="600"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-cogs2" value="690"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-cogs3" value="792"></div>
+        <div class="grid grid-cols-4 gap-2"><label class="text-xs">المصاريف</label><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-opex1" value="200"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-opex2" value="220"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-opex3" value="240"></div>
+        <div class="grid grid-cols-4 gap-2"><label class="text-xs">صافي ربح</label><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-net1" value="150"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-net2" value="180"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-net3" value="220"></div>
+        <div class="grid grid-cols-4 gap-2"><label class="text-xs">الأصول</label><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-asset1" value="500"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-asset2" value="550"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-asset3" value="600"></div>
+        <div class="grid grid-cols-4 gap-2"><label class="text-xs">حقوق الملكية</label><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-eq1" value="300"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-eq2" value="350"><input type="number" class="input-field px-2 py-1 rounded-lg text-center" id="h-eq3" value="400"></div>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-4 no-print">
+      <button onclick="calcHorizontal()" class="btn-primary px-6 py-2 rounded-lg font-bold">احسب</button>
+      <button onclick="loadSampleHorizontal()" class="btn-secondary px-4 py-2 rounded-lg">مثال</button>
+    </div>
+    <div id="horizontal-results" class="hidden">
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="card p-4 overflow-x-auto"><h4 class="font-bold mb-2">التحليل الأفقي (% التغير)</h4><table class="w-full text-sm"><tbody id="hor-table"></tbody></table></div>
+        <div class="card p-4 overflow-x-auto"><h4 class="font-bold mb-2">التحليل الرأسي (Common Size)</h4><table class="w-full text-sm"><tbody id="ver-table"></tbody></table></div>
+      </div>
+      <div class="card p-4"><canvas id="horizontalChart" height="80"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TOOL: COMPARISON -->
+  <div id="tool-comparison" class="page p-6">
+    <div class="flex items-center gap-3 mb-4 no-print"><button onclick="showTool('tools')" class="btn-secondary px-3 py-2 rounded-lg text-sm">← الأدوات</button></div>
+    <h2 class="text-2xl font-bold mb-2">مقارنة الشركات</h2>
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">الشركة أ</h4>
+        <div class="space-y-2">
+          <div><input type="text" class="input-field w-full px-3 py-1 rounded-lg" placeholder="الاسم" id="comp1-name" value="شركة أ"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="EPS" id="comp1-eps" value="5"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="BVPS" id="comp1-bvps" value="25"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="سعر السهم" id="comp1-price" value="50"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="الديون" id="comp1-debt" value="200"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="الأصول" id="comp1-asset" value="500"></div>
+        </div>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">الشركة ب</h4>
+        <div class="space-y-2">
+          <div><input type="text" class="input-field w-full px-3 py-1 rounded-lg" placeholder="الاسم" id="comp2-name" value="شركة ب"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="EPS" id="comp2-eps" value="4"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="BVPS" id="comp2-bvps" value="20"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="سعر السهم" id="comp2-price" value="40"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="الديون" id="comp2-debt" value="300"></div>
+          <div><input type="number" class="input-field w-full px-3 py-1 rounded-lg" placeholder="الأصول" id="comp2-asset" value="600"></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mb-4 no-print">
+      <button onclick="calcComparison()" class="btn-primary px-6 py-2 rounded-lg font-bold">قارن</button>
+      <button onclick="loadSampleComparison()" class="btn-secondary px-4 py-2 rounded-lg">مثال</button>
+    </div>
+    <div id="comparison-results" class="hidden">
+      <div class="grid md:grid-cols-2 gap-4 mb-4">
+        <div class="card p-4 overflow-x-auto"><table class="w-full text-sm"><tbody id="comp-table"></tbody></table></div>
+        <div class="card p-4"><canvas id="radarChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOL: BREAKEVEN -->
+  <div id="tool-breakeven" class="page p-6">
+    <div class="flex items-center gap-3 mb-4 no-print"><button onclick="showTool('tools')" class="btn-secondary px-3 py-2 rounded-lg text-sm">← الأدوات</button></div>
+    <h2 class="text-2xl font-bold mb-2">حاسبة نقطة التعادل</h2>
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div class="card p-4">
+        <div class="space-y-2">
+          <div><label class="text-xs text-gray-400">التكاليف الثابتة</label><input type="number" id="be-fixed" class="input-field w-full px-3 py-1 rounded-lg" value="50000"></div>
+          <div><label class="text-xs text-gray-400">سعر البيع/وحدة</label><input type="number" id="be-price" class="input-field w-full px-3 py-1 rounded-lg" value="100"></div>
+          <div><label class="text-xs text-gray-400">تكلفة متغيرة/وحدة</label><input type="number" id="be-variable" class="input-field w-full px-3 py-1 rounded-lg" value="60"></div>
+          <div><label class="text-xs text-gray-400">هدف المبيعات</label><input type="number" id="be-target" class="input-field w-full px-3 py-1 rounded-lg" value="2000"></div>
+        </div>
+      </div>
+      <div class="md:col-span-2 card p-4">
+        <div id="be-results" class="hidden">
+          <div class="grid grid-cols-3 gap-4 mb-4">
+            <div class="text-center"><div class="text-xs text-gray-400">نقطة التعادل (وحدات)</div><div id="be-units" class="text-xl font-bold accent-text"></div></div>
+            <div class="text-center"><div class="text-xs text-gray-400">نقطة التعادل (ر.س)</div><div id="be-revenue" class="text-xl font-bold accent-text"></div></div>
+            <div class="text-center"><div class="text-xs text-gray-400">هامش الأمان</div><div id="be-margin" class="text-xl font-bold accent-text"></div></div>
+          </div>
+          <div class="mb-4"><canvas id="beChart" height="80"></canvas></div>
+          <div class="card p-4 overflow-x-auto"><table class="w-full text-sm"><tbody id="be-table"></tbody></table></div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 no-print">
+      <button onclick="calcBreakeven()" class="btn-primary px-6 py-2 rounded-lg font-bold">احسب</button>
+      <button onclick="loadSampleBreakeven()" class="btn-secondary px-4 py-2 rounded-lg">مثال</button>
+    </div>
+  </div>
+
+  <!-- PAGE: ACADEMY -->
+  <div id="page-academy" class="page p-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">الأكاديمية التعليمية</h1>
+      <p class="text-gray-400 text-sm">تعلم التحليل المالي من واقع خبرة 25 سنة</p>
+    </div>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="card p-5"><div class="text-2xl mb-2">📊</div><h3 class="font-bold">مقدمة في التحليل المالي</h3><p class="text-gray-400 text-sm">أساسيات القوائم المالية</p><div class="mt-3 text-xs text-green-400">مجاني</div></div>
+      <div class="card p-5"><div class="text-2xl mb-2">🧮</div><h3 class="font-bold">نموذج DCF</h3><p class="text-gray-400 text-sm">كيف تُقيّم الشركة بـ DCF</p><div class="mt-3 text-xs text-green-400">مجاني</div></div>
+      <div class="card p-5"><div class="text-2xl mb-2">📋</div><h3 class="font-bold">تخطيط الميزانيات</h3><p class="text-gray-400 text-sm">من واقع خبرة SEC</p><div class="mt-3 text-xs text-yellow-400">متقدم</div></div>
+      <div class="card p-5"><div class="text-2xl mb-2">📈</div><h3 class="font-bold">التحليل الأفقي والرأسي</h3><p class="text-gray-400 text-sm">مقارنة الأداء عبر الزمن</p><div class="mt-3 text-xs text-green-400">مجاني</div></div>
+      <div class="card p-5"><div class="text-2xl mb-2">⚖️</div><h3 class="font-bold">نقطة التعادل</h3><p class="text-gray-400 text-sm">Cost-Volume-Profit Analysis</p><div class="mt-3 text-xs text-green-400">مجاني</div></div>
+      <div class="card p-5"><div class="text-2xl mb-2">🏢</div><h3 class="font-bold">نماذج شركات المرافق</h3><p class="text-gray-400 text-sm">Utilities: كهرباء، مياه، غاز</p><div class="mt-3 text-xs text-yellow-400">متقدم</div></div>
+    </div>
+    <div class="disclaimer-bar p-4 rounded-lg mt-6">
+      <p class="text-sm text-yellow-200">⚠️ هذا المحتوى تعليمي فقط. الهدف تعليمي — لا يُقدم توصيات استثمارية أو مالية.</p>
+    </div>
+  </div>
+
+  <!-- PAGE: CONSULTING -->
+  <div id="page-consulting" class="page p-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">الاستشارة التعليمية الخاصة</h1>
+      <p class="text-gray-400 text-sm">جلسة توجيهية مع محلل مالي متقاعد (غير مرخص)</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-6">
+        <h3 class="font-bold mb-4 accent-text">📋 الجلسة التعليمية</h3>
+        <ul class="space-y-2 text-sm">
+          <li>✅ مراجعة تحليلك المالي</li>
+          <li>✅ شرح نموذج DCF أو Multiples</li>
+          <li>✅ مساعدة في ميزانية مشروع</li>
+          <li>✅ توجيه في التحليل الأفقي</li>
+          <li>❌ لا توصيات شراء/بيع</li>
+          <li>❌ لا تخطيط مالي شخصي</li>
+          <li>❌ لا تحليل "استثماري"</li>
+        </ul>
+        <div class="mt-4 p-3 bg-green-500/10 rounded-lg text-center">
+          <div class="text-2xl font-bold">500 ر.س</div>
+          <div class="text-sm text-gray-400">الجلسة الواحدة (ساعة)</div>
+        </div>
+      </div>
+      <div class="card p-6">
+        <h3 class="font-bold mb-4 accent-text">⚖️ التزاماتي</h3>
+        <div class="space-y-2 text-sm text-gray-300">
+          <p>• أُقدم "توجيهاً تعليمياً" فقط</p>
+          <p>• لا أُقدم "استشارة مالية" مرخصة</p>
+          <p>• لا أتحمل مسؤولية قراراتك</p>
+          <p>• لا أُقدم توصيات شراء/بيع</p>
+          <p>• العقد تعليمي — لا استثماري</p>
+        </div>
+        <div class="mt-4 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+          <p class="text-sm text-yellow-200">⚠️ أنا محلل مالي متقاعد، لا مستشار مالي مرخص من هيئة السوق المالية (CMA). الجلسة تعليمية بحتة.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: ABOUT -->
+  <div id="page-about" class="page p-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">من نحن</h1>
+      <p class="text-gray-400 text-sm">خبرة 25 سنة في الشركة السعودية للكهرباء</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-6">
+        <h3 class="font-bold mb-4 accent-text">🏛️ الخلفية المهنية</h3>
+        <div class="space-y-3 text-sm text-gray-300">
+          <p>• 25 سنة في الشركة السعودية للكهرباء (SEC)</p>
+          <p>• تخطيط ميزانيات، تحليل انحراف، مشاريع استثمارية</p>
+          <p>• شركات المرافق (Utilities): خصوصيات وتحديات</p>
+          <p>• التدفقات النقدية والتقييم المالي</p>
+          <p>• المتقاعد: أُشارك الخبرة — لا أُقدم توصيات</p>
+        </div>
+      </div>
+      <div class="card p-6">
+        <h3 class="font-bold mb-4 accent-text">⚠️ التوضيح القانوني</h3>
+        <div class="space-y-3 text-sm text-gray-300">
+          <p>• أنا محلل مالي متقاعد — لا مستشار مالي مرخص</p>
+          <p>• لا أحمل ترخيص من هيئة السوق المالية (CMA)</p>
+          <p>• Qiyas Global: تحليلية وتعليمية فقط</p>
+          <p>• لا توصيات شراء/بيع/احتفاظ</p>
+          <p>• المستخدم يُحلل بنفسه — أنا "مُعلّم"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: TERMS -->
+  <div id="page-terms" class="page p-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold">الشروط والأحكام</h1>
+      <p class="text-gray-400 text-sm">إخلاء مسؤولية + عقد استشارة تعليمية</p>
+    </div>
+    <div class="space-y-4 text-sm text-gray-300">
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">1. إخلاء مسؤولية</h4>
+        <p>Qiyas Global نظام تحليلي وتعليمي فقط. لا يُقدم توصيات استثمارية أو مالية. المستخدم يتحمل مسؤولية قراراته بالكامل.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">2. عدم الاستشارة المالية</h4>
+        <p>المُقدّم ليس مستشاراً مالياً مرخصاً من هيئة السوق المالية (CMA). لا يُقدم تخطيطاً مالياً شخصياً أو توصيات استثمارية.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">3. عقد استشارة تعليمية</h4>
+        <p>الجلسة التعليمية: توجيه وشرح ومراجعة — لا توصية. المستخدم يُدخل البيانات ويُحلل بنفسه. المُقدّم "يُعلّم" لا "يُوصي".</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">4. الخصوصية والبيانات</h4>
+        <p>البيانات تُحفظ في متصفحك (LocalStorage). لا يتم إرسالها لأي خادم. يمكنك تصديرها أو حذفها في أي وقت.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">5. لا علاقة توظيف</h4>
+        <p>لا يوجد علاقة توظيف أو إدارة أو وكالة. المستخدم يستخدم الأدوات على مسؤوليته الخاصة.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">6. التسعير</h4>
+        <p>الأدوات الأساسية مجانية. الاستشارة التعليمية: 500 ر.س/جلسة. الاستشارة لا تُعدّ "خدمة مالية".</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">7. حدود المسؤولية</h4>
+        <p>المسؤولية محدودة بمبلغ الجلسة المدفوع. لا تُشمل خسائر استثمارية أو أضرار غير مباشرة.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">8. الفصل</h4>
+        <p>إذا حُكم ببطلان أي شرط، يبقى الباقي نافذاً. القانون السعودي هو المرجع.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">9. القبول</h4>
+        <p>باستخدامك المنصة، توافق على هذه الشروط بالكامل. إذا لم توافق، لا تستخدم المنصة.</p>
+      </div>
+      <div class="card p-4">
+        <h4 class="font-bold mb-2 text-green-400">10. التعديل</h4>
+        <p>يُحتفظ بالحق في تعديل الشروط. التعديلات تُعلن في الموقع. الاستخدام المستمر يعني القبول.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: PRICING -->
+  <div id="page-pricing" class="page p-6">
+    <div class="mb-6 text-center">
+      <h1 class="text-2xl font-bold">الباقات والتسعير</h1>
+      <p class="text-gray-400 text-sm">ابدأ مجاناً — وارقَ عندما تكون جاهزاً</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div class="card p-6 border border-white/5">
+        <div class="text-center mb-4">
+          <div class="text-lg font-bold">مجاني</div>
+          <div class="text-3xl font-bold mt-2">0 ر.س</div>
+          <div class="text-xs text-gray-400">شهرياً</div>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li>✅ 3 أدوات تحليلية</li>
+          <li>✅ CRM بسيط</li>
+          <li>✅ Calendar</li>
+          <li>✅ Tasks</li>
+          <li>✅ Invoices (5/شهر)</li>
+          <li>❌ Multiples</li>
+          <li>❌ LBO</li>
+          <li>❌ أكاديمية متقدمة</li>
+        </ul>
+      </div>
+      <div class="card p-6 border border-green-400/50 glow">
+        <div class="text-center mb-4">
+          <div class="text-lg font-bold accent-text">احترافية</div>
+          <div class="text-3xl font-bold mt-2 accent-text">49 ر.س</div>
+          <div class="text-xs text-gray-400">شهرياً</div>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li>✅ كل الأدوات (6+)</li>
+          <li>✅ CRM كامل</li>
+          <li>✅ Calendar + Tasks</li>
+          <li>✅ Invoices غير محدود</li>
+          <li>✅ Dashboard</li>
+          <li>✅ Multiples + LBO</li>
+          <li>✅ تصدير Excel</li>
+          <li>✅ أكاديمية متقدمة</li>
+        </ul>
+      </div>
+      <div class="card p-6 border border-white/5">
+        <div class="text-center mb-4">
+          <div class="text-lg font-bold">استشارة</div>
+          <div class="text-3xl font-bold mt-2">500 ر.س</div>
+          <div class="text-xs text-gray-400">/جلسة (ساعة)</div>
+        </div>
+        <ul class="space-y-2 text-sm text-gray-300">
+          <li>✅ جلسة توجيهية</li>
+          <li>✅ مراجعة تحليلك</li>
+          <li>✅ شرح DCF/Multiples</li>
+          <li>✅ مساعدة في ميزانية</li>
+          <li>❌ لا توصيات شراء/بيع</li>
+          <li>❌ لا تخطيط مالي شخصي</li>
+        </ul>
+      </div>
+    </div>
+    <div class="disclaimer-bar p-4 rounded-lg mt-6 max-w-4xl mx-auto">
+      <p class="text-sm text-yellow-200 text-center">⚠️ الاستشارة تعليمية فقط — لا توصيات استثمارية. المُقدم غير مرخص من هيئة السوق المالية.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODALS -->
+<div id="modal-overlay" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+  <div class="glass p-6 rounded-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Import File Input (hidden) -->
+<input type="file" id="import-file" accept=".json" class="hidden" onchange="handleImportFile(event)">
+
+
+<script>
+// ==================== DATA STORE ====================
+const DB_KEY = 'qiyas_erp_data';
+function getData() {
+  try { const d = localStorage.getItem(DB_KEY); return d ? JSON.parse(d) : initData(); } catch(e) { return initData(); }
+}
+function initData() {
+  return {
+    clients: [
+      {id:1, name:'أحمد محمد', email:'ahmed@example.com', phone:'0500000001', notes:'مهتم بـ DCF', sessions:2, lastContact:'2025-06-25'},
+      {id:2, name:'خالد العلي', email:'khaled@example.com', phone:'0500000002', notes:'ميزانية Q2', sessions:1, lastContact:'2025-06-28'},
+      {id:3, name:'سارة القحطاني', email:'sara@example.com', phone:'0500000003', notes:'تحليل أفقي', sessions:1, lastContact:'2025-06-20'}
+    ],
+    sessions: [
+      {id:1, clientId:1, title:'DCF لشركة أحمد', date:'2025-07-05', time:'14:00', status:'upcoming'},
+      {id:2, clientId:2, title:'مراجعة ميزانية', date:'2025-07-10', time:'10:00', status:'upcoming'},
+      {id:3, clientId:3, title:'النسب المالية', date:'2025-06-25', time:'11:00', status:'completed'}
+    ],
+    invoices: [
+      {id:1, date:'2025-06-25', clientId:1, title:'جلسة DCF', amount:500, status:'paid'},
+      {id:2, date:'2025-06-28', clientId:2, title:'مراجعة ميزانية', amount:500, status:'unpaid'}
+    ],
+    tasks: [
+      {id:1, title:'نشر منشور LinkedIn', status:'todo'},
+      {id:2, title:'مراجعة تحليل أحمد', status:'progress'},
+      {id:3, title:'تحديث الموقع', status:'done'}
+    ]
+  };
+}
+function saveData(data) { localStorage.setItem(DB_KEY, JSON.stringify(data)); }
+let data = getData();
+
+// ==================== NAVIGATION ====================
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + pageId);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  const si = document.querySelector('.sidebar-item[data-page="'+pageId+'"]');
+  if(si) si.classList.add('active');
+  if(pageId === 'dashboard') renderDashboard();
+  if(pageId === 'crm') renderClients();
+  if(pageId === 'calendar') renderCalendar();
+  if(pageId === 'invoices') renderInvoices();
+  if(pageId === 'tasks') renderTasks();
+}
+function showTool(toolId) {
+  if(toolId === 'tools') showPage('tools');
+  else {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('tool-' + toolId).classList.add('active');
+  }
+}
+
+// ==================== DATE ====================
+document.getElementById('current-date').textContent = new Date().toLocaleDateString('ar-SA', {year:'numeric', month:'long', day:'numeric'});
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  data = getData();
+  document.getElementById('dash-clients').textContent = data.clients.length;
+  document.getElementById('dash-sessions').textContent = data.sessions.filter(s => s.status === 'upcoming').length;
+  const paid = data.invoices.filter(i => i.status === 'paid').reduce((a,b) => a + b.amount, 0);
+  document.getElementById('dash-revenue').textContent = paid.toLocaleString();
+  document.getElementById('dash-tasks').textContent = data.tasks.filter(t => t.status !== 'done').length;
+  
+  const upcoming = data.sessions.filter(s => s.status === 'upcoming').slice(0,3);
+  document.getElementById('dash-upcoming').innerHTML = upcoming.length ? upcoming.map(s => {
+    const c = data.clients.find(cl => cl.id === s.clientId);
+    return '<div class="flex justify-between items-center p-2 bg-white/5 rounded-lg"><div><div class="font-bold text-sm">'+s.title+'</div><div class="text-xs text-gray-400">'+(c?c.name:'')+'</div></div><div class="text-xs text-green-400">'+s.date+'</div></div>';
+  }).join('') : '<div class="text-gray-400 text-sm">لا جلسات قادمة</div>';
+  
+  const latestClients = data.clients.slice(-3).reverse();
+  document.getElementById('dash-latest-clients').innerHTML = latestClients.map(c => 
+    '<div class="flex justify-between items-center p-2 bg-white/5 rounded-lg"><div><div class="font-bold text-sm">'+c.name+'</div><div class="text-xs text-gray-400">'+c.sessions+' جلسات</div></div><div class="text-xs text-gray-400">'+c.lastContact+'</div></div>'
+  ).join('');
+  
+  const unpaid = data.invoices.filter(i => i.status === 'unpaid');
+  document.getElementById('dash-unpaid').innerHTML = unpaid.length ? unpaid.map(i => {
+    const c = data.clients.find(cl => cl.id === i.clientId);
+    return '<div class="flex justify-between items-center p-2 bg-white/5 rounded-lg"><div><div class="font-bold text-sm">'+i.title+'</div><div class="text-xs text-gray-400">'+(c?c.name:'')+'</div></div><div class="text-xs text-red-400">'+i.amount+' ر.س</div></div>';
+  }).join('') : '<div class="text-gray-400 text-sm">لا فواتير مستحقة</div>';
+  
+  const latestTasks = data.tasks.filter(t => t.status !== 'done').slice(0,3);
+  document.getElementById('dash-latest-tasks').innerHTML = latestTasks.length ? latestTasks.map(t =>
+    '<div class="flex items-center gap-2 p-2 bg-white/5 rounded-lg"><span class="text-xs">'+statusIcon(t.status)+'</span><span class="text-sm">'+t.title+'</span></div>'
+  ).join('') : '<div class="text-gray-400 text-sm">لا مهام معلقة</div>';
+}
+function statusIcon(s) { return s==='todo'?'⏳':s==='progress'?'🔄':'✅'; }
+
+// ==================== CRM ====================
+function renderClients() {
+  data = getData();
+  const search = document.getElementById('client-search').value.toLowerCase();
+  const filtered = data.clients.filter(c => c.name.toLowerCase().includes(search) || c.email.toLowerCase().includes(search) || c.phone.includes(search));
+  const tbody = document.getElementById('clients-table');
+  tbody.innerHTML = filtered.map(c => '<tr class="border-b border-white/5 hover:bg-white/5"><td class="p-3 font-bold">'+c.name+'</td><td class="p-3 text-sm text-gray-400">'+c.email+'</td><td class="p-3 text-sm">'+c.phone+'</td><td class="p-3 text-center">'+c.sessions+'</td><td class="p-3 text-sm text-gray-400">'+c.lastContact+'</td><td class="p-3 text-sm text-gray-400">'+c.notes+'</td><td class="p-3"><button onclick="editClient('+c.id+')" class="text-blue-400 text-sm ml-2">تعديل</button><button onclick="deleteClient('+c.id+')" class="text-red-400 text-sm">حذف</button></td></tr>').join('');
+}
+function openClientModal(id) {
+  const c = id ? data.clients.find(cl => cl.id === id) : null;
+  document.getElementById('modal-content').innerHTML = '<div class="flex justify-between items-center mb-4"><h3 class="font-bold">'+(c?'تعديل':'إضافة')+' عميل</h3><button onclick="closeModal()" class="text-gray-400">✕</button></div><div class="space-y-3"><input id="c-name" class="input-field w-full px-3 py-2 rounded-lg" placeholder="الاسم" value="'+(c?c.name:'')+'"><input id="c-email" class="input-field w-full px-3 py-2 rounded-lg" placeholder="البريد" value="'+(c?c.email:'')+'"><input id="c-phone" class="input-field w-full px-3 py-2 rounded-lg" placeholder="الهاتف" value="'+(c?c.phone:'')+'"><textarea id="c-notes" class="input-field w-full px-3 py-2 rounded-lg" placeholder="ملاحظات" rows="2">'+(c?c.notes:'')+'</textarea><button onclick="saveClient('+(c?c.id:'null')+')" class="btn-primary w-full py-2 rounded-lg font-bold">حفظ</button></div>';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function saveClient(id) {
+  const name = document.getElementById('c-name').value;
+  if(!name) return alert('الاسم مطلوب');
+  const client = {
+    id: id || Date.now(),
+    name, email: document.getElementById('c-email').value, phone: document.getElementById('c-phone').value,
+    notes: document.getElementById('c-notes').value, sessions: 0, lastContact: new Date().toISOString().split('T')[0]
+  };
+  if(id) { const idx = data.clients.findIndex(c => c.id === id); data.clients[idx] = {...data.clients[idx], ...client}; }
+  else data.clients.push(client);
+  saveData(data); closeModal(); renderClients();
+}
+function editClient(id) { openClientModal(id); }
+function deleteClient(id) { if(!confirm('هل تريد الحذف؟')) return; data.clients = data.clients.filter(c => c.id !== id); saveData(data); renderClients(); }
+function exportClients() {
+  const ws = XLSX.utils.json_to_sheet(data.clients);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Clients');
+  XLSX.writeFile(wb, 'qiyas_clients.xlsx');
+}
+
+// ==================== CALENDAR ====================
+function renderCalendar() {
+  data = getData();
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sessions-upcoming').innerHTML = data.sessions.filter(s => s.date > today && s.status === 'upcoming').map(s => {
+    const c = data.clients.find(cl => cl.id === s.clientId);
+    return '<div class="p-3 bg-white/5 rounded-lg border-r-2 border-green-400"><div class="font-bold text-sm">'+s.title+'</div><div class="text-xs text-gray-400">'+(c?c.name:'')+' — '+s.time+'</div><div class="text-xs text-green-400">'+s.date+'</div></div>';
+  }).join('') || '<div class="text-gray-400 text-sm">لا جلسات</div>';
+  document.getElementById('sessions-today').innerHTML = data.sessions.filter(s => s.date === today).map(s => {
+    const c = data.clients.find(cl => cl.id === s.clientId);
+    return '<div class="p-3 bg-white/5 rounded-lg border-r-2 border-yellow-400"><div class="font-bold text-sm">'+s.title+'</div><div class="text-xs text-gray-400">'+(c?c.name:'')+' — '+s.time+'</div></div>';
+  }).join('') || '<div class="text-gray-400 text-sm">لا جلسات اليوم</div>';
+  document.getElementById('sessions-past').innerHTML = data.sessions.filter(s => s.date < today || s.status === 'completed').slice(-5).map(s => {
+    const c = data.clients.find(cl => cl.id === s.clientId);
+    return '<div class="p-3 bg-white/5 rounded-lg border-r-2 border-gray-500"><div class="font-bold text-sm text-gray-400">'+s.title+'</div><div class="text-xs text-gray-500">'+(c?c.name:'')+' — '+s.date+'</div></div>';
+  }).join('') || '<div class="text-gray-400 text-sm">لا جلسات</div>';
+}
+function openSessionModal() {
+  const clientOptions = data.clients.map(c => '<option value="'+c.id+'">'+c.name+'</option>').join('');
+  document.getElementById('modal-content').innerHTML = '<div class="flex justify-between items-center mb-4"><h3 class="font-bold">جلسة جديدة</h3><button onclick="closeModal()" class="text-gray-400">✕</button></div><div class="space-y-3"><select id="s-client" class="input-field w-full px-3 py-2 rounded-lg">'+clientOptions+'</select><input id="s-title" class="input-field w-full px-3 py-2 rounded-lg" placeholder="الموضوع"><input id="s-date" type="date" class="input-field w-full px-3 py-2 rounded-lg"><input id="s-time" type="time" class="input-field w-full px-3 py-2 rounded-lg"><button onclick="saveSession()" class="btn-primary w-full py-2 rounded-lg font-bold">حفظ</button></div>';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function saveSession() {
+  const session = {
+    id: Date.now(), clientId: parseInt(document.getElementById('s-client').value),
+    title: document.getElementById('s-title').value, date: document.getElementById('s-date').value,
+    time: document.getElementById('s-time').value, status: 'upcoming'
+  };
+  data.sessions.push(session); saveData(data); closeModal(); renderCalendar();
+}
+
+// ==================== INVOICES ====================
+function renderInvoices() {
+  data = getData();
+  const filter = document.getElementById('invoice-filter').value;
+  let filtered = data.invoices;
+  if(filter !== 'all') filtered = filtered.filter(i => i.status === filter);
+  const tbody = document.getElementById('invoices-table');
+  tbody.innerHTML = filtered.map(i => {
+    const c = data.clients.find(cl => cl.id === i.clientId);
+    const badge = i.status === 'paid' ? '<span class="badge-paid">مدفوع</span>' : i.status === 'unpaid' ? '<span class="badge-unpaid">غير مدفوع</span>' : '<span class="badge-pending">معلق</span>';
+    return '<tr class="border-b border-white/5 hover:bg-white/5"><td class="p-3 text-sm">#'+i.id+'</td><td class="p-3 text-sm">'+i.date+'</td><td class="p-3">'+(c?c.name:'')+'</td><td class="p-3 text-sm">'+i.title+'</td><td class="p-3 font-bold">'+i.amount+'</td><td class="p-3">'+badge+'</td><td class="p-3"><button onclick="toggleInvoice('+i.id+')" class="text-sm text-blue-400">تغيير</button></td></tr>';
+  }).join('');
+  const paid = data.invoices.filter(i => i.status === 'paid').reduce((a,b) => a + b.amount, 0);
+  const unpaid = data.invoices.filter(i => i.status === 'unpaid').reduce((a,b) => a + b.amount, 0);
+  document.getElementById('inv-total-paid').textContent = paid.toLocaleString();
+  document.getElementById('inv-total-unpaid').textContent = unpaid.toLocaleString();
+  document.getElementById('inv-total').textContent = (paid + unpaid).toLocaleString();
+}
+function openInvoiceModal() {
+  const clientOptions = data.clients.map(c => '<option value="'+c.id+'">'+c.name+'</option>').join('');
+  document.getElementById('modal-content').innerHTML = '<div class="flex justify-between items-center mb-4"><h3 class="font-bold">فاتورة جديدة</h3><button onclick="closeModal()" class="text-gray-400">✕</button></div><div class="space-y-3"><select id="i-client" class="input-field w-full px-3 py-2 rounded-lg">'+clientOptions+'</select><input id="i-title" class="input-field w-full px-3 py-2 rounded-lg" placeholder="الموضوع"><input id="i-amount" type="number" class="input-field w-full px-3 py-2 rounded-lg" placeholder="المبلغ"><input id="i-date" type="date" class="input-field w-full px-3 py-2 rounded-lg"><select id="i-status" class="input-field w-full px-3 py-2 rounded-lg"><option value="unpaid">غير مدفوع</option><option value="paid">مدفوع</option></select><button onclick="saveInvoice()" class="btn-primary w-full py-2 rounded-lg font-bold">حفظ</button></div>';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function saveInvoice() {
+  const inv = { id: Date.now(), clientId: parseInt(document.getElementById('i-client').value), title: document.getElementById('i-title').value, amount: parseFloat(document.getElementById('i-amount').value) || 0, date: document.getElementById('i-date').value, status: document.getElementById('i-status').value };
+  data.invoices.push(inv); saveData(data); closeModal(); renderInvoices();
+}
+function toggleInvoice(id) {
+  const i = data.invoices.find(inv => inv.id === id);
+  if(i) { i.status = i.status === 'paid' ? 'unpaid' : 'paid'; saveData(data); renderInvoices(); }
+}
+function exportInvoices() {
+  const ws = XLSX.utils.json_to_sheet(data.invoices);
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Invoices');
+  XLSX.writeFile(wb, 'qiyas_invoices.xlsx');
+}
+
+// ==================== TASKS ====================
+function renderTasks() {
+  data = getData();
+  ['todo','progress','done'].forEach(s => {
+    const el = document.getElementById('tasks-' + s);
+    const tasks = data.tasks.filter(t => t.status === s);
+    el.innerHTML = tasks.map(t => '<div class="p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10" onclick="cycleTask('+t.id+')"><div class="text-sm font-bold">'+t.title+'</div><div class="text-xs text-gray-400">انقر لتغيير الحالة</div></div>').join('') || '<div class="text-gray-400 text-sm text-center p-4">لا مهام</div>';
+  });
+}
+function openTaskModal() {
+  document.getElementById('modal-content').innerHTML = '<div class="flex justify-between items-center mb-4"><h3 class="font-bold">مهمة جديدة</h3><button onclick="closeModal()" class="text-gray-400">✕</button></div><div class="space-y-3"><input id="t-title" class="input-field w-full px-3 py-2 rounded-lg" placeholder="عنوان المهمة"><select id="t-status" class="input-field w-full px-3 py-2 rounded-lg"><option value="todo">قيد الانتظار</option><option value="progress">قيد التنفيذ</option><option value="done">مكتملة</option></select><button onclick="saveTask()" class="btn-primary w-full py-2 rounded-lg font-bold">حفظ</button></div>';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function saveTask() {
+  const task = { id: Date.now(), title: document.getElementById('t-title').value, status: document.getElementById('t-status').value };
+  data.tasks.push(task); saveData(data); closeModal(); renderTasks();
+}
+function cycleTask(id) {
+  const t = data.tasks.find(tk => tk.id === id);
+  if(t) { t.status = t.status === 'todo' ? 'progress' : t.status === 'progress' ? 'done' : 'todo'; saveData(data); renderTasks(); }
+}
+
+// ==================== MODAL ====================
+function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
+document.getElementById('modal-overlay').addEventListener('click', e => { if(e.target === document.getElementById('modal-overlay')) closeModal(); });
+
+// ==================== IMPORT / EXPORT ====================
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'qiyas_backup_' + new Date().toISOString().split('T')[0] + '.json'; a.click(); URL.revokeObjectURL(url);
+}
+function importData() { document.getElementById('import-file').click(); }
+function handleImportFile(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { try { const d = JSON.parse(ev.target.result); data = d; saveData(data); alert('تم الاستيراد بنجاح'); location.reload(); } catch(err) { alert('ملف غير صالح'); } };
+  reader.readAsText(file);
+}
+
+// ==================== FINANCIAL TOOLS ====================
+function loadSampleRatios() { document.getElementById('rev').value=1000000; document.getElementById('cogs').value=600000; document.getElementById('opex').value=200000; document.getElementById('interest').value=50000; document.getElementById('tax').value=30000; document.getElementById('ca').value=500000; document.getElementById('inventory').value=150000; document.getElementById('fa').value=800000; document.getElementById('cl').value=200000; document.getElementById('ltd').value=300000; document.getElementById('equity').value=800000; calcRatios(); }
+function calcRatios() {
+  const rev = parseFloat(document.getElementById('rev').value)||0, cogs = parseFloat(document.getElementById('cogs').value)||0, opex = parseFloat(document.getElementById('opex').value)||0, interest = parseFloat(document.getElementById('interest').value)||0, tax = parseFloat(document.getElementById('tax').value)||0;
+  const ca = parseFloat(document.getElementById('ca').value)||0, inv = parseFloat(document.getElementById('inventory').value)||0, fa = parseFloat(document.getElementById('fa').value)||0, cl = parseFloat(document.getElementById('cl').value)||0, ltd = parseFloat(document.getElementById('ltd').value)||0, equity = parseFloat(document.getElementById('equity').value)||0;
+  const gp = rev - cogs, ebit = gp - opex, ebt = ebit - interest, net = ebt - tax, ta = ca + fa, td = cl + ltd;
+  const ratios = {
+    'Gross Margin': {v: (gp/rev*100).toFixed(1)+'%', good: gp/rev > 0.3},
+    'Operating Margin': {v: (ebit/rev*100).toFixed(1)+'%', good: ebit/rev > 0.15},
+    'Net Margin': {v: (net/rev*100).toFixed(1)+'%', good: net/rev > 0.05},
+    'ROE': {v: (net/equity*100).toFixed(1)+'%', good: net/equity > 0.12},
+    'ROA': {v: (net/ta*100).toFixed(1)+'%', good: net/ta > 0.06},
+    'Current Ratio': {v: (ca/cl).toFixed(2), good: ca/cl > 1.5},
+    'Quick Ratio': {v: ((ca-inv)/cl).toFixed(2), good: (ca-inv)/cl > 1},
+    'Debt-to-Equity': {v: (td/equity).toFixed(2), good: td/equity < 1},
+    'Debt-to-Assets': {v: (td/ta).toFixed(2), good: td/ta < 0.5},
+    'Inventory Turnover': {v: (cogs/inv).toFixed(1)+'x', good: cogs/inv > 4},
+    'Asset Turnover': {v: (rev/ta).toFixed(2)+'x', good: rev/ta > 0.5},
+    'Interest Coverage': {v: (ebit/interest).toFixed(1)+'x', good: ebit/interest > 3},
+    'Tax Burden': {v: (net/ebt).toFixed(2), good: net/ebt > 0.7},
+    'Interest Burden': {v: (ebt/ebit).toFixed(2), good: ebt/ebit > 0.8}
+  };
+  const profit = ['Gross Margin','Operating Margin','Net Margin','ROE','ROA'];
+  const liquid = ['Current Ratio','Quick Ratio','Debt-to-Equity','Debt-to-Assets','Interest Coverage'];
+  const eff = ['Inventory Turnover','Asset Turnover','Tax Burden','Interest Burden'];
+  document.getElementById('r-profit').innerHTML = profit.map(k => '<div class="flex justify-between"><span>'+k+'</span><span class="font-bold '+(ratios[k].good?'metric-positive':'metric-negative')+'">'+ratios[k].v+'</span></div>').join('');
+  document.getElementById('r-liquid').innerHTML = liquid.map(k => '<div class="flex justify-between"><span>'+k+'</span><span class="font-bold '+(ratios[k].good?'metric-positive':'metric-negative')+'">'+ratios[k].v+'</span></div>').join('');
+  document.getElementById('r-eff').innerHTML = eff.map(k => '<div class="flex justify-between"><span>'+k+'</span><span class="font-bold '+(ratios[k].good?'metric-positive':'metric-negative')+'">'+ratios[k].v+'</span></div>').join('');
+  document.getElementById('ratios-results').classList.remove('hidden');
+  renderRatiosChart(Object.keys(ratios).map(k => k.substring(0,10)), Object.keys(ratios).map(k => parseFloat(ratios[k].v)));
+}
+function renderRatiosChart(labels, values) {
+  const ctx = document.getElementById('ratiosChart').getContext('2d');
+  if(window.ratiosChart) window.ratiosChart.destroy();
+  window.ratiosChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'النسب', data: values, backgroundColor: '#22c55e' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } } });
+}
+function exportRatiosExcel() {
+  const rows = []; document.querySelectorAll('#r-profit > div, #r-liquid > div, #r-eff > div').forEach(r => { const t = r.querySelectorAll('span'); rows.push({Ratio: t[0].textContent, Value: t[1].textContent}); });
+  const ws = XLSX.utils.json_to_sheet(rows); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Ratios'); XLSX.writeFile(wb, 'qiyas_ratios.xlsx');
+}
+
+function loadSampleDCF() { document.getElementById('wacc').value=10; document.getElementById('g').value=2; document.getElementById('shares').value=1000000; document.getElementById('net-debt').value=200000; document.getElementById('fcf1').value=100; document.getElementById('fcf2').value=115; document.getElementById('fcf3').value=132; document.getElementById('fcf4').value=152; document.getElementById('fcf5').value=175; calcDCF(); }
+function calcDCF() {
+  const wacc = parseFloat(document.getElementById('wacc').value)/100, g = parseFloat(document.getElementById('g').value)/100, shares = parseFloat(document.getElementById('shares').value)||1, netDebt = parseFloat(document.getElementById('net-debt').value)||0;
+  const fcfs = [1,2,3,4,5].map(i => parseFloat(document.getElementById('fcf'+i).value)||0);
+  let pv = 0, rows = '';
+  fcfs.forEach((f, i) => { const d = Math.pow(1+wacc, i+1); const p = f/d; pv += p; rows += '<tr><td class="p-2">'+(i+1)+'</td><td class="p-2">'+(f*1000).toLocaleString()+'</td><td class="p-2">'+(1/d).toFixed(4)+'</td><td class="p-2">'+(p*1000).toLocaleString()+'</td></tr>'; });
+  const tv = (fcfs[4]*(1+g))/(wacc-g); const pvtv = tv/Math.pow(1+wacc, 5); const ev = pv + pvtv; const equity = ev - netDebt/1000; const fair = (equity*1000)/shares;
+  document.getElementById('dcf-pv-fcf').textContent = (pv*1000).toLocaleString();
+  document.getElementById('dcf-pv-tv').textContent = (pvtv*1000).toLocaleString();
+  document.getElementById('dcf-enterprise').textContent = (ev*1000).toLocaleString();
+  document.getElementById('dcf-fair').textContent = fair.toFixed(2);
+  document.getElementById('dcf-table').innerHTML = rows + '<tr class="border-t border-white/20"><td class="p-2 font-bold">القيمة الدائمة</td><td class="p-2">'+(tv*1000).toLocaleString()+'</td><td class="p-2">'+(1/Math.pow(1+wacc,5)).toFixed(4)+'</td><td class="p-2">'+(pvtv*1000).toLocaleString()+'</td></tr>';
+  document.getElementById('dcf-results').classList.remove('hidden');
+}
+
+function loadSampleBudget() { document.getElementById('b-rev').value=500000; document.getElementById('b-cogs').value=45; document.getElementById('b-opex').value=120000; document.getElementById('b-capex').value=300000; document.getElementById('b-debt').value=100000; document.getElementById('b-int').value=6; document.getElementById('b-depr').value=25000; document.getElementById('b-growth').value=5; calcBudget(); }
+function calcBudget() {
+  const rev = parseFloat(document.getElementById('b-rev').value)||0, cogs = parseFloat(document.getElementById('b-cogs').value)/100, opex = parseFloat(document.getElementById('b-opex').value)||0, capex = parseFloat(document.getElementById('b-capex').value)||0, debt = parseFloat(document.getElementById('b-debt').value)||0, intr = parseFloat(document.getElementById('b-int').value)/100, depr = parseFloat(document.getElementById('b-depr').value)||0;
+  const annual = rev*12, cogsA = annual*cogs, gp = annual - cogsA, opexA = opex*12, ebitda = gp - opexA, ebit = ebitda - depr*12, interest = debt*intr, ebt = ebit - interest, tax = ebt*0.2, net = ebt - tax, fcf = net + depr*12 - capex;
+  const fc = opexA + depr*12 + interest, vc = cogsA, p = rev, cm = p - cogsA/12, be = fc/cm;
+  document.getElementById('b-annual').textContent = annual.toLocaleString();
+  document.getElementById('b-net').textContent = net.toLocaleString();
+  document.getElementById('b-fcf').textContent = fcf.toLocaleString();
+  document.getElementById('b-breakeven').textContent = Math.round(be).toLocaleString();
+  document.getElementById('budget-results').classList.remove('hidden');
+  renderBudgetChart([annual, cogsA, opexA, ebitda, net, fcf]);
+}
+function renderBudgetChart(data) {
+  const ctx = document.getElementById('budgetChart').getContext('2d');
+  if(window.budgetChart) window.budgetChart.destroy();
+  window.budgetChart = new Chart(ctx, { type: 'bar', data: { labels: ['إيرادات','COGS','Opex','EBITDA','صافي ربح','FCF'], datasets: [{ data, backgroundColor: ['#22c55e','#ef4444','#ef4444','#3b82f6','#22c55e','#a855f7'] }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } } });
+}
+
+function loadSampleHorizontal() { calcHorizontal(); }
+function calcHorizontal() {
+  const rows = ['rev','cogs','opex','net','asset','eq'];
+  const years = [1,2,3];
+  const data = rows.map(r => years.map(y => parseFloat(document.getElementById('h-'+r+y).value)||0));
+  let horTable = '<tr><th class="p-2">البند</th><th class="p-2">2023 vs 2022</th><th class="p-2">2024 vs 2023</th></tr>';
+  const labels = ['الإيرادات','COGS','المصاريف','صافي ربح','الأصول','حقوق الملكية'];
+  data.forEach((row, i) => { const c1 = row[0] ? ((row[1]-row[0])/row[0]*100).toFixed(1)+'%' : '-'; const c2 = row[1] ? ((row[2]-row[1])/row[1]*100).toFixed(1)+'%' : '-'; horTable += '<tr><td class="p-2">'+labels[i]+'</td><td class="p-2 '+(c1.includes('-')?'metric-negative':'metric-positive')+'">'+c1+'</td><td class="p-2 '+(c2.includes('-')?'metric-negative':'metric-positive')+'">'+c2+'</td></tr>'; });
+  document.getElementById('hor-table').innerHTML = horTable;
+  let verTable = '<tr><th class="p-2">البند</th><th class="p-2">2022</th><th class="p-2">2023</th><th class="p-2">2024</th></tr>';
+  const revs = [data[0][0], data[0][1], data[0][2]];
+  data.forEach((row, i) => { const base = i === 0 ? row : revs; verTable += '<tr><td class="p-2">'+labels[i]+'</td>'+row.map((v, j) => '<td class="p-2">'+(base[j] ? (v/base[j]*100).toFixed(1)+'%' : '-').replace('100.0%', '100%')+'</td>').join('')+'</tr>'; });
+  document.getElementById('ver-table').innerHTML = verTable;
+  document.getElementById('horizontal-results').classList.remove('hidden');
+  renderHorizontalChart(labels, data);
+}
+function renderHorizontalChart(labels, data) {
+  const ctx = document.getElementById('horizontalChart').getContext('2d');
+  if(window.horChart) window.horChart.destroy();
+  const colors = ['#22c55e','#ef4444','#f59e0b','#3b82f6','#a855f7','#ec4899'];
+  window.horChart = new Chart(ctx, { type: 'line', data: { labels: ['2022','2023','2024'], datasets: labels.map((l,i) => ({ label: l, data: data[i], borderColor: colors[i], fill: false })) }, options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } } });
+}
+
+function loadSampleComparison() { calcComparison(); }
+function calcComparison() {
+  const n1 = document.getElementById('comp1-name').value, n2 = document.getElementById('comp2-name').value;
+  const e1 = parseFloat(document.getElementById('comp1-eps').value)||1, e2 = parseFloat(document.getElementById('comp2-eps').value)||1;
+  const b1 = parseFloat(document.getElementById('comp1-bvps').value)||1, b2 = parseFloat(document.getElementById('comp2-bvps').value)||1;
+  const p1 = parseFloat(document.getElementById('comp1-price').value)||1, p2 = parseFloat(document.getElementById('comp2-price').value)||1;
+  const d1 = parseFloat(document.getElementById('comp1-debt').value)||1, d2 = parseFloat(document.getElementById('comp2-debt').value)||1;
+  const a1 = parseFloat(document.getElementById('comp1-asset').value)||1, a2 = parseFloat(document.getElementById('comp2-asset').value)||1;
+  const m = [
+    ['P/E', (p1/e1).toFixed(1), (p2/e2).toFixed(1)], ['P/B', (p1/b1).toFixed(1), (p2/b2).toFixed(1)], ['Debt/Equity', (d1/a1).toFixed(2), (d2/a2).toFixed(2)], ['ROE', (e1/b1).toFixed(1), (e2/b2).toFixed(1)], ['EPS', e1, e2], ['BVPS', b1, b2]
+  ];
+  let table = '<tr><th class="p-2">المقياس</th><th class="p-2">'+n1+'</th><th class="p-2">'+n2+'</th><th class="p-2">الأفضل</th></tr>';
+  m.forEach(row => { const best = parseFloat(row[1]) <= parseFloat(row[2]) ? (row[0].includes('Debt') ? n1 : n2) : (row[0].includes('Debt') ? n2 : n1); table += '<tr><td class="p-2">'+row[0]+'</td><td class="p-2 font-bold">'+row[1]+'</td><td class="p-2 font-bold">'+row[2]+'</td><td class="p-2 text-green-400">'+best+'</td></tr>'; });
+  document.getElementById('comp-table').innerHTML = table;
+  document.getElementById('comparison-results').classList.remove('hidden');
+  renderRadarChart([n1, n2], [[p1/e1, p1/b1, e1/b1, a1/d1, e1], [p2/e2, p2/b2, e2/b2, a2/d2, e2]]);
+}
+function renderRadarChart(labels, data) {
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  if(window.radarChart) window.radarChart.destroy();
+  window.radarChart = new Chart(ctx, { type: 'radar', data: { labels: ['P/E (low=good)', 'P/B (low=good)', 'ROE', 'Asset/Debt', 'EPS'], datasets: [{ label: labels[0], data: data[0], borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.2)' }, { label: labels[1], data: data[1], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)' }] }, options: { responsive: true, scales: { r: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#94a3b8' } } } } });
+}
+
+function loadSampleBreakeven() { document.getElementById('be-fixed').value=50000; document.getElementById('be-price').value=100; document.getElementById('be-variable').value=60; document.getElementById('be-target').value=2000; calcBreakeven(); }
+function calcBreakeven() {
+  const fixed = parseFloat(document.getElementById('be-fixed').value)||0, price = parseFloat(document.getElementById('be-price').value)||1, variable = parseFloat(document.getElementById('be-variable').value)||0, target = parseFloat(document.getElementById('be-target').value)||0;
+  const cm = price - variable, beu = fixed/cm, ber = beu*price, margin = target ? ((target - beu)/target*100).toFixed(1)+'%' : '-';
+  document.getElementById('be-units').textContent = Math.round(beu).toLocaleString();
+  document.getElementById('be-revenue').textContent = Math.round(ber).toLocaleString();
+  document.getElementById('be-margin').textContent = margin;
+  let table = '<tr><th class="p-2">الوحدات</th><th class="p-2">الإيرادات</th><th class="p-2">التكاليف المتغيرة</th><th class="p-2">التكاليف الثابتة</th><th class="p-2">صافي الربح</th></tr>';
+  for(let u = 0; u <= target; u += Math.round(target/10)) { const rev = u*price, vc = u*variable, net = rev - vc - fixed; table += '<tr><td class="p-2">'+u+'</td><td class="p-2">'+rev.toLocaleString()+'</td><td class="p-2">'+vc.toLocaleString()+'</td><td class="p-2">'+fixed.toLocaleString()+'</td><td class="p-2 '+(net>=0?'metric-positive':'metric-negative')+'">'+net.toLocaleString()+'</td></tr>'; }
+  document.getElementById('be-table').innerHTML = table;
+  document.getElementById('be-results').classList.remove('hidden');
+  renderBeChart([0, Math.round(beu/2), Math.round(beu), Math.round(target*0.75), target], fixed, price, variable);
+}
+function renderBeChart(units, fixed, price, variable) {
+  const ctx = document.getElementById('beChart').getContext('2d');
+  if(window.beChart) window.beChart.destroy();
+  const revenues = units.map(u => u*price); const costs = units.map(u => fixed + u*variable); const profits = units.map(u => u*price - fixed - u*variable);
+  window.beChart = new Chart(ctx, { type: 'line', data: { labels: units.map(u => u.toString()), datasets: [{ label: 'الإيرادات', data: revenues, borderColor: '#22c55e', fill: false }, { label: 'التكاليف', data: costs, borderColor: '#ef4444', fill: false }, { label: 'الربح', data: profits, borderColor: '#3b82f6', fill: false }] }, options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } } });
+}
+
+// ==================== INIT ====================
+renderDashboard();
+</script>
+</body>
+</html>
